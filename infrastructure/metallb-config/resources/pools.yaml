@@ -1,0 +1,28 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: local
+spec:
+  addresses:
+    - 192.168.1.222/32 # CHANGEME this will be your local IP
+  autoAssign: false
+  avoidBuggyIPs: false
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: public
+spec:
+  addresses:
+    - 192.168.1.221/32 # CHANGEME this will be your public IP (port forward HERE!)
+  autoAssign: false
+  avoidBuggyIPs: false
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: default
+spec:
+  ipAddressPools:
+    - local
+    - public
