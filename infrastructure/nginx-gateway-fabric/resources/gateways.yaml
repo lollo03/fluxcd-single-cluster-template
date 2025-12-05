@@ -1,0 +1,80 @@
+# --- Public Gateway ---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: public-gateway
+  namespace: nginx-gateway
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt" # Install cert manager!
+    external-dns.alpha.kubernetes.io/target: "example.com" # Install external DNS!
+spec:
+  gatewayClassName: nginx
+  infrastructure:
+    annotations:
+      metallb.io/address-pool: public
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https
+      port: 443
+      hostname: "*.example.com" # CHANGEME
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: All 
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: wildcard-domain-tls
+---
+# --- Private Gateway ---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: private-gateway
+  namespace: nginx-gateway
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "192.168.1.222" # Same ip of local pool!
+spec:
+  gatewayClassName: nginx
+  infrastructure:
+    annotations:
+      metallb.io/address-pool: local
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      hostname: "*.local.example.com" # CHANGEME
+      allowedRoutes:
+        namespaces:
+          from: All
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-external-to-gateway
+  namespace: nginx-gateway
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values: 
+          - private-gateway-nginx
+          - public-gateway-nginx
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+
+    ports:
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 443

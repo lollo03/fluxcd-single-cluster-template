@@ -1,0 +1,23 @@
+# .sops.yaml
+# -------------------
+# DEFINE KEYS HERE
+# -------------------
+keys:
+  # The Admin's local GPG Key (optional, for manual decryption on your laptop)
+  - &admin_pgp "YOUR_FULL_GPG_FINGERPRINT_HERE" 
+  
+  # The Cluster's Age Key (required, for Flux to decrypt inside k0s)
+  - &cluster_age "age1_YOUR_PUBLIC_KEY_HERE"
+
+creation_rules:
+  - path_regex: .*.yaml
+    encrypted_regex: ^(data|stringData)$
+    key_groups:
+      - pgp:
+          - *admin_pgp
+        age:
+          - *cluster_age
+
+stores:
+  yaml:
+    indent: 2
