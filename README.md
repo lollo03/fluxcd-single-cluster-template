@@ -116,7 +116,7 @@ Review `infrastructure/nginx-gateway-fabric/resources/gateways.yaml` to ensure t
 
 This template uses `local-path-provisioner` to utilize node disk space.
 
-  * Check `infrastructure/local-path-provisioner/resources/values.yaml` if you need to customize the storage path (defaults to `/var/lib/rancher/k0s/storage`).
+  * Check `infrastructure/local-path-provisioner/resources/values.yaml` if you need to customize the storage path (defaults to `/opt/local-path-provisioner`).
 
 -----
 
